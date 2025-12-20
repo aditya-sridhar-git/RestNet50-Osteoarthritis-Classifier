@@ -1,7 +1,9 @@
-tensorflow
+torch
+torchvision
 opencv-python
 numpy
 flask
 flask-cors
 schedule
 matplotlib
+Pillow
