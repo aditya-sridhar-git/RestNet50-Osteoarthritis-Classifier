@@ -3,4 +3,7 @@ AI-based Arthritis Severity Detection System
 - Diet & exercise recommendations
 - Alert scheduling
 - Explainable AI (Grad-CAM)
-<img width="1472" height="768" alt="image" src="https://github.com/user-attachments/assets/3faf607f-5021-4a42-a3be-c7b7e5eb1849" />
+
+Model Training
+<img width="1600" height="880" alt="image" src="https://github.com/user-attachments/assets/884123b6-dd92-4b32-b7b8-c43089ed57ca" />
+
