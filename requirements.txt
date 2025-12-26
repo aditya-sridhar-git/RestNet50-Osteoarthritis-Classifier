@@ -7,3 +7,5 @@ flask-cors
 schedule
 matplotlib
 Pillow
+requests
+pymongo
