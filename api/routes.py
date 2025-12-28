@@ -62,6 +62,7 @@ def signup():
     Optional: pastHistory
     """
     data = request.json
+    print(f"DEBUG: signup received data: {data}")
     
     # Validate required fields
     required_fields = ["whatsappNumber", "username", "password", "age"]
