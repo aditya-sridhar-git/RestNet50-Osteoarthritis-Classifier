@@ -1,9 +1,14 @@
+import os
 import requests
 import json
 from typing import Dict, List, Any
+from dotenv import load_dotenv
 
-OLLAMA_BASE_URL = "http://localhost:11434"
-MODEL_NAME = "llama3.2"  # Change to your preferred model
+# Load environment variables from .env file
+load_dotenv()
+
+OLLAMA_BASE_URL = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434")
+MODEL_NAME = os.environ.get("OLLAMA_MODEL", "llama3.2")
 
 # Fallback recommendations when Ollama is unavailable
 FALLBACK_RECOMMENDATIONS = {
@@ -148,17 +153,40 @@ def parse_json_from_response(response: str) -> Dict:
     return {}
 
 
-def generate_recommendations(severity: str) -> Dict[str, Any]:
+def generate_recommendations(severity: str, patient_data: dict = None) -> Dict[str, Any]:
     """
-    Generate personalized recommendations based on severity level.
+    Generate personalized recommendations based on severity level and patient data.
     Uses Ollama if available, falls back to static recommendations.
+    
+    Args:
+        severity: Osteoarthritis severity level
+        patient_data: Optional dict with 'age', 'pastHistory' fields
     """
     # Check if Ollama is available
     if check_ollama_available():
+        # Build patient context string
+        patient_context = ""
+        if patient_data:
+            age = patient_data.get('age', 'unknown')
+            past_history = patient_data.get('pastHistory', '')
+            
+            patient_context = f"""
+PATIENT PROFILE:
+- Age: {age} years old
+- Medical History: {past_history if past_history else 'No significant history reported'}
+
+IMPORTANT CONSIDERATIONS:
+- For older patients (60+): Focus on low-impact exercises, fall prevention, medication timing
+- For younger patients: Can include more active exercises but still joint-friendly
+- If diabetic: Consider blood sugar impact of diet recommendations, regular meal times
+- If heart disease: Avoid strenuous exercises, include medication reminders
+- If hypertension: Low-sodium diet recommendations, stress management
+"""
+        
         prompt = f"""You are a medical AI assistant specializing in osteoarthritis management.
 Based on a patient's knee X-ray analysis showing {severity.upper()} severity osteoarthritis, 
 generate personalized recommendations.
-
+{patient_context}
 Return a valid JSON object with this exact structure:
 {{
     "diet": [
@@ -168,7 +196,7 @@ Return a valid JSON object with this exact structure:
         {{"name": "Exercise Name", "duration": "Time", "frequency": "How often", "intensity": "Level", "tips": "Safety tips"}}
     ],
     "alerts": [
-        {{"type": "exercise|medication|meal|checkup|hydration", "title": "Alert Title", "time": "HH:MM", "frequency": "daily|weekly|monthly", "description": "Details"}}
+        {{"type": "exercise|medication|meal|checkup|hydration", "title": "Alert Title", "time": "HH:MM", "frequency": "daily|weekly|monthly|mon,wed,fri", "description": "Details"}}
     ]
 }}
 
@@ -179,7 +207,14 @@ Consider the severity level ({severity}) when making recommendations:
 - Moderate: Medical supervision, physiotherapy
 - Severe: Specialist care, restricted activities
 
-Provide practical, actionable recommendations. Include at least 3 items for each category.
+Generate a comprehensive daily schedule with at least 5-7 alerts covering:
+- Morning exercise routine
+- Medication reminders (if applicable based on history)
+- Meal times with anti-inflammatory focus
+- Hydration reminders
+- Evening stretching/relaxation
+
+Provide practical, actionable recommendations tailored to the patient's age and medical history.
 Return ONLY the JSON object, no additional text."""
 
         response = generate_with_ollama(prompt)
@@ -190,6 +225,7 @@ Return ONLY the JSON object, no additional text."""
                 "severity": severity,
                 "recommendations": parsed,
                 "source": "ai",
+                "personalized": patient_data is not None,
                 "disclaimer": "These AI-generated recommendations are for informational purposes only. Always consult with healthcare professionals before making changes to your diet, exercise, or medication regimen."
             }
     
@@ -199,23 +235,43 @@ Return ONLY the JSON object, no additional text."""
         "severity": severity,
         "recommendations": fallback,
         "source": "static",
+        "personalized": False,
         "disclaimer": "These recommendations are general guidelines. Please consult with healthcare professionals for personalized medical advice."
     }
 
 
-def get_diet_recommendations(severity: str) -> List[Dict]:
+def generate_personalized_calendar(severity: str, patient_data: dict) -> List[Dict]:
+    """
+    Generate a personalized calendar/schedule based on patient data.
+    Returns a list of calendar events.
+    """
+    result = generate_recommendations(severity, patient_data)
+    alerts = result["recommendations"].get("alerts", [])
+    
+    # Add event IDs and metadata
+    import uuid
+    for alert in alerts:
+        alert['eventId'] = str(uuid.uuid4())
+        alert['isAiGenerated'] = True
+        alert['isModified'] = False
+    
+    return alerts
+
+
+def get_diet_recommendations(severity: str, patient_data: dict = None) -> List[Dict]:
     """Get diet recommendations for a severity level."""
-    data = generate_recommendations(severity)
+    data = generate_recommendations(severity, patient_data)
     return data["recommendations"].get("diet", [])
 
 
-def get_exercise_plan(severity: str) -> List[Dict]:
+def get_exercise_plan(severity: str, patient_data: dict = None) -> List[Dict]:
     """Get exercise plan for a severity level."""
-    data = generate_recommendations(severity)
+    data = generate_recommendations(severity, patient_data)
     return data["recommendations"].get("exercise", [])
 
 
-def get_alert_suggestions(severity: str) -> List[Dict]:
+def get_alert_suggestions(severity: str, patient_data: dict = None) -> List[Dict]:
     """Get suggested alerts for a severity level."""
-    data = generate_recommendations(severity)
+    data = generate_recommendations(severity, patient_data)
     return data["recommendations"].get("alerts", [])
+

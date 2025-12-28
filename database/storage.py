@@ -4,10 +4,14 @@ import string
 import hashlib
 from datetime import datetime
 from pymongo import MongoClient, ASCENDING, DESCENDING
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Database Configuration
 MONGO_URI = os.environ.get("MONGO_URI", "mongodb+srv://admin:DTLELproject@patient-cluster.rjadvfw.mongodb.net/?retryWrites=true&w=majority")
-DB_NAME = "hospitalDB"
+DB_NAME = os.environ.get("MONGO_DB_NAME", "hospitalDB")
 
 def get_db():
     """Get database connection."""
@@ -308,6 +312,111 @@ def login_with_otp(whatsapp_number: str, otp: str) -> dict:
         "user": user
     }
 
+# ===== Calendar Management =====
+
+import uuid as uuid_module
+
+def save_patient_calendar(patient_id: str, events: list) -> bool:
+    """
+    Save or update patient's calendar events.
+    Each event should have: type, title, time, frequency, description
+    """
+    db = get_db()
+    
+    # Add unique IDs to events if not present
+    for event in events:
+        if 'eventId' not in event:
+            event['eventId'] = str(uuid_module.uuid4())
+        if 'isAiGenerated' not in event:
+            event['isAiGenerated'] = True
+        if 'isModified' not in event:
+            event['isModified'] = False
+    
+    try:
+        result = db.calendars.update_one(
+            {"patientId": patient_id},
+            {
+                "$set": {
+                    "patientId": patient_id,
+                    "events": events,
+                    "lastUpdated": datetime.utcnow()
+                }
+            },
+            upsert=True
+        )
+        return True
+    except Exception as e:
+        print(f"Error saving calendar: {e}")
+        return False
+
+def get_patient_calendar(patient_id: str) -> dict:
+    """Get patient's saved calendar events."""
+    db = get_db()
+    calendar = db.calendars.find_one({"patientId": patient_id}, {"_id": 0})
+    return calendar
+
+def add_calendar_event(patient_id: str, event: dict) -> dict:
+    """Add a single event to patient's calendar."""
+    db = get_db()
+    
+    # Generate event ID
+    event['eventId'] = str(uuid_module.uuid4())
+    event['isAiGenerated'] = False
+    event['isModified'] = False
+    
+    try:
+        result = db.calendars.update_one(
+            {"patientId": patient_id},
+            {
+                "$push": {"events": event},
+                "$set": {"lastUpdated": datetime.utcnow()}
+            },
+            upsert=True
+        )
+        return event
+    except Exception as e:
+        print(f"Error adding event: {e}")
+        return None
+
+def update_calendar_event(patient_id: str, event_id: str, updated_event: dict) -> bool:
+    """Update a specific calendar event."""
+    db = get_db()
+    
+    updated_event['isModified'] = True
+    updated_event['eventId'] = event_id  # Preserve event ID
+    
+    try:
+        result = db.calendars.update_one(
+            {"patientId": patient_id, "events.eventId": event_id},
+            {
+                "$set": {
+                    "events.$": updated_event,
+                    "lastUpdated": datetime.utcnow()
+                }
+            }
+        )
+        return result.modified_count > 0
+    except Exception as e:
+        print(f"Error updating event: {e}")
+        return False
+
+def delete_calendar_event(patient_id: str, event_id: str) -> bool:
+    """Delete a specific calendar event."""
+    db = get_db()
+    
+    try:
+        result = db.calendars.update_one(
+            {"patientId": patient_id},
+            {
+                "$pull": {"events": {"eventId": event_id}},
+                "$set": {"lastUpdated": datetime.utcnow()}
+            }
+        )
+        return result.modified_count > 0
+    except Exception as e:
+        print(f"Error deleting event: {e}")
+        return False
+
 # ===== Legacy compatibility =====
 
 history = []
@@ -319,3 +428,4 @@ def save_record(user, severity):
 def get_history():
     """Legacy function for backward compatibility."""
     return history
+

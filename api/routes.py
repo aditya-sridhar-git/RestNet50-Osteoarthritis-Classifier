@@ -13,13 +13,18 @@ from database.storage import (
     get_patient_by_id,
     get_patient_by_whatsapp,
     update_patient_severity,
+    save_patient_calendar,
+    get_patient_calendar,
+    add_calendar_event,
+    update_calendar_event,
+    delete_calendar_event,
 )
-from services.ollama_service import generate_recommendations
+from services.ollama_service import generate_recommendations, generate_personalized_calendar
 
 # Get project root
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 UPLOAD_FOLDER = os.path.join(PROJECT_ROOT, 'uploads')
-FRONTEND_FOLDER = os.path.join(PROJECT_ROOT, 'frontend-react', 'dist')
+FRONTEND_FOLDER = os.path.join(PROJECT_ROOT, 'frontend', 'dist')
 
 # Create necessary folders
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -220,7 +225,7 @@ def analyze():
 @routes.route("/analyze-upload", methods=["POST"])
 @cross_origin()
 def analyze_upload():
-    """Analyze uploaded X-ray image."""
+    """Analyze uploaded X-ray image with personalized recommendations."""
     # Check if file was uploaded
     if 'image' not in request.files:
         return jsonify({"error": "No image file provided"}), 400
@@ -240,12 +245,30 @@ def analyze_upload():
         # Analyze the image
         severity, confidence = predict_severity(filepath)
         
-        # Get AI-powered recommendations
-        recommendations = generate_recommendations(severity)
-        
-        # Update patient severity in database
+        # Get patient data for personalized recommendations
+        patient_data = None
         if patient_id:
-            update_patient_severity(patient_id, severity)
+            patient = get_patient_by_id(patient_id)
+            if patient:
+                patient_data = {
+                    "age": patient.get("age"),
+                    "pastHistory": patient.get("pastHistory", "")
+                }
+                update_patient_severity(patient_id, severity)
+        
+        # Get AI-powered personalized recommendations
+        recommendations = generate_recommendations(severity, patient_data)
+        
+        # Save calendar events to database
+        if patient_id and recommendations.get("recommendations", {}).get("alerts"):
+            alerts = recommendations["recommendations"]["alerts"]
+            # Add event metadata
+            for alert in alerts:
+                if 'eventId' not in alert:
+                    alert['eventId'] = str(uuid.uuid4())
+                alert['isAiGenerated'] = True
+                alert['isModified'] = False
+            save_patient_calendar(patient_id, alerts)
         
         return jsonify({
             "severity": severity,
@@ -254,6 +277,7 @@ def analyze_upload():
             "exercise": recommendations["recommendations"].get("exercise", []),
             "alerts": recommendations["recommendations"].get("alerts", []),
             "source": recommendations.get("source", "static"),
+            "personalized": recommendations.get("personalized", False),
             "disclaimer": recommendations.get("disclaimer", "Not a medical diagnosis")
         })
     finally:
@@ -269,6 +293,121 @@ def get_recommendations():
     """Get AI-powered recommendations for a severity level."""
     data = request.json
     severity = data.get("severity", "Normal")
+    patient_id = data.get("patient_id")
     
-    recommendations = generate_recommendations(severity)
+    # Get patient data for personalization
+    patient_data = None
+    if patient_id:
+        patient = get_patient_by_id(patient_id)
+        if patient:
+            patient_data = {
+                "age": patient.get("age"),
+                "pastHistory": patient.get("pastHistory", "")
+            }
+    
+    recommendations = generate_recommendations(severity, patient_data)
     return jsonify(recommendations)
+
+
+# ===== Calendar Endpoints =====
+
+@routes.route("/api/calendar/<patient_id>", methods=["GET"])
+@cross_origin()
+def get_calendar(patient_id):
+    """Get patient's saved calendar events."""
+    calendar = get_patient_calendar(patient_id)
+    
+    if not calendar:
+        return jsonify({"events": [], "patientId": patient_id})
+    
+    return jsonify(calendar)
+
+
+@routes.route("/api/calendar/generate", methods=["POST"])
+@cross_origin()
+def generate_calendar():
+    """Generate AI calendar based on patient profile."""
+    data = request.json
+    patient_id = data.get("patient_id")
+    
+    if not patient_id:
+        return jsonify({"error": "Patient ID required"}), 400
+    
+    patient = get_patient_by_id(patient_id)
+    if not patient:
+        return jsonify({"error": "Patient not found"}), 404
+    
+    severity = patient.get("severity", "Normal")
+    if not severity:
+        return jsonify({"error": "Please analyze an X-ray first to get a severity level"}), 400
+    
+    patient_data = {
+        "age": patient.get("age"),
+        "pastHistory": patient.get("pastHistory", "")
+    }
+    
+    # Generate personalized calendar
+    events = generate_personalized_calendar(severity, patient_data)
+    
+    # Save to database
+    save_patient_calendar(patient_id, events)
+    
+    return jsonify({
+        "message": "Calendar generated successfully",
+        "events": events,
+        "patientId": patient_id,
+        "severity": severity
+    })
+
+
+@routes.route("/api/calendar/event", methods=["POST"])
+@cross_origin()
+def add_event():
+    """Add a custom event to patient's calendar."""
+    data = request.json
+    patient_id = data.get("patient_id")
+    event = data.get("event")
+    
+    if not patient_id or not event:
+        return jsonify({"error": "Patient ID and event data required"}), 400
+    
+    result = add_calendar_event(patient_id, event)
+    
+    if result:
+        return jsonify({"message": "Event added", "event": result}), 201
+    return jsonify({"error": "Failed to add event"}), 500
+
+
+@routes.route("/api/calendar/event/<event_id>", methods=["PUT"])
+@cross_origin()
+def update_event(event_id):
+    """Update an existing calendar event."""
+    data = request.json
+    patient_id = data.get("patient_id")
+    updated_event = data.get("event")
+    
+    if not patient_id or not updated_event:
+        return jsonify({"error": "Patient ID and event data required"}), 400
+    
+    success = update_calendar_event(patient_id, event_id, updated_event)
+    
+    if success:
+        return jsonify({"message": "Event updated"})
+    return jsonify({"error": "Failed to update event"}), 500
+
+
+@routes.route("/api/calendar/event/<event_id>", methods=["DELETE"])
+@cross_origin()
+def remove_event(event_id):
+    """Delete a calendar event."""
+    patient_id = request.args.get("patient_id")
+    
+    if not patient_id:
+        return jsonify({"error": "Patient ID required"}), 400
+    
+    success = delete_calendar_event(patient_id, event_id)
+    
+    if success:
+        return jsonify({"message": "Event deleted"})
+    return jsonify({"error": "Failed to delete event"}), 500
+
