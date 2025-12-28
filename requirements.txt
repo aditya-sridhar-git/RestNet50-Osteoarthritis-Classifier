@@ -9,4 +9,5 @@ matplotlib
 Pillow
 requests
 pymongo
-
+python-dotenv
+twilio

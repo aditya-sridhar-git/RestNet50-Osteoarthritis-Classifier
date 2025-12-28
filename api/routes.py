@@ -132,6 +132,8 @@ def send_otp():
     Send OTP to WhatsApp number for login.
     Required: whatsappNumber
     """
+    from services.twilio_service import send_otp_sms
+    
     data = request.json
     whatsapp_number = data.get("whatsappNumber")
     
@@ -146,12 +148,19 @@ def send_otp():
     # Generate and store OTP
     otp = create_otp_session(whatsapp_number)
     
-    # In production, send OTP via WhatsApp API
-    return jsonify({
-        "message": "OTP sent successfully",
-        "whatsappNumber": whatsapp_number,
-        "otp": otp  # Remove in production!
-    })
+    # Send OTP via Twilio SMS
+    sms_result = send_otp_sms(whatsapp_number, otp)
+    
+    response = {
+        "message": sms_result["message"],
+        "whatsappNumber": whatsapp_number
+    }
+    
+    # Include OTP only if in development mode (SMS failed)
+    if "otp" in sms_result:
+        response["otp"] = sms_result["otp"]
+    
+    return jsonify(response)
 
 
 @routes.route("/api/auth/verify-otp", methods=["POST"])

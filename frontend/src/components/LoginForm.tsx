@@ -33,10 +33,10 @@ export default function LoginForm({
     const handleSendOtp = async (e: React.FormEvent) => {
         e.preventDefault();
         const receivedOtp = await onSendOtp(whatsappNumber);
-        if (receivedOtp) {
-            setOtpSent(true);
-            setDevOtp(receivedOtp);
-        }
+        // Always show OTP input after sending
+        setOtpSent(true);
+        // Set devOtp if returned (SMS failed), otherwise null
+        setDevOtp(receivedOtp || null);
     };
 
     const handleVerifyOtp = async (e: React.FormEvent) => {
