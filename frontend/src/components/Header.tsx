@@ -24,10 +24,22 @@ export default function Header({ activeTab, onTabChange }: HeaderProps) {
                     Calendar
                 </button>
                 <button
+                    className={`nav-link ${activeTab === 'discussions' ? 'active' : ''}`}
+                    onClick={() => onTabChange('discussions')}
+                >
+                    Discussions
+                </button>
+                <button
                     className={`nav-link ${activeTab === 'about' ? 'active' : ''}`}
                     onClick={() => onTabChange('about')}
                 >
                     About
+                </button>
+                <button
+                    className={`nav-link ${activeTab === 'settings' ? 'active' : ''}`}
+                    onClick={() => onTabChange('settings')}
+                >
+                    Settings
                 </button>
             </nav>
         </header>

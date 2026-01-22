@@ -3,9 +3,10 @@ import type { DietRecommendation } from '../types';
 interface DietRecommendationsProps {
     recommendations: DietRecommendation[];
     source: 'ai' | 'static';
+    language: 'en' | 'kn';
 }
 
-export default function DietRecommendations({ recommendations, source }: DietRecommendationsProps) {
+export default function DietRecommendations({ recommendations, source, language }: DietRecommendationsProps) {
     if (!recommendations || recommendations.length === 0) {
         return (
             <div className="result-item">
@@ -38,14 +39,18 @@ export default function DietRecommendations({ recommendations, source }: DietRec
             <div className="recommendation-grid">
                 {recommendations.map((rec, index) => (
                     <div key={index} className="recommendation-card">
-                        <div className="recommendation-category">{rec.category}</div>
+                        <div className="recommendation-category">
+                            {language === 'en' ? rec.category : (rec.category_kn || rec.category)}
+                        </div>
                         <ul className="recommendation-items">
                             {rec.items.map((item, i) => (
-                                <li key={i}>{item}</li>
+                                <li key={i}>
+                                    {language === 'en' ? item : (rec.items_kn?.[i] || item)}
+                                </li>
                             ))}
                         </ul>
-                        <div className="recommendation-frequency">
-                            📅 {rec.frequency}
+                        <div className="recommendation-frequency" style={{ marginTop: '0.75rem', borderTop: '1px solid var(--border-color)', paddingTop: '0.5rem' }}>
+                            📅 {language === 'en' ? rec.frequency : (rec.frequency_kn || rec.frequency)}
                         </div>
                     </div>
                 ))}

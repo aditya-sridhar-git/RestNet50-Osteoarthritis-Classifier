@@ -5,10 +5,11 @@ import ExercisePlan from './ExercisePlan';
 
 interface AnalysisResultsProps {
     result: AnalysisResult;
+    language: 'en' | 'kn';
     onAddSuggestedAlerts: () => void;
 }
 
-export default function AnalysisResults({ result, onAddSuggestedAlerts }: AnalysisResultsProps) {
+export default function AnalysisResults({ result, language, onAddSuggestedAlerts }: AnalysisResultsProps) {
     return (
         <div className="results-section">
             <div className="results-card">
@@ -30,11 +31,13 @@ export default function AnalysisResults({ result, onAddSuggestedAlerts }: Analys
                     <DietRecommendations
                         recommendations={result.diet}
                         source={result.source}
+                        language={language}
                     />
 
                     <ExercisePlan
                         exercises={result.exercise}
                         source={result.source}
+                        language={language}
                     />
 
                     {result.alerts && result.alerts.length > 0 && (
@@ -56,18 +59,39 @@ export default function AnalysisResults({ result, onAddSuggestedAlerts }: Analys
                                 {result.alerts.slice(0, 4).map((alert, index) => (
                                     <div key={index} className="recommendation-card">
                                         <div className="recommendation-category">
-                                            {alert.type === 'exercise' && '🏃 '}
-                                            {alert.type === 'medication' && '💊 '}
-                                            {alert.type === 'meal' && '🥗 '}
-                                            {alert.type === 'checkup' && '🏥 '}
-                                            {alert.type === 'hydration' && '💧 '}
-                                            {alert.title}
+                                            {language === 'en' ? (
+                                                <div className="en-text">
+                                                    {alert.type === 'exercise' && '🏃 '}
+                                                    {alert.type === 'medication' && '💊 '}
+                                                    {alert.type === 'meal' && '🥗 '}
+                                                    {alert.type === 'checkup' && '🏥 '}
+                                                    {alert.type === 'hydration' && '💧 '}
+                                                    {alert.title}
+                                                </div>
+                                            ) : (
+                                                <div className="kn-text">
+                                                    {alert.type === 'exercise' && '🏃 '}
+                                                    {alert.type === 'medication' && '💊 '}
+                                                    {alert.type === 'meal' && '🥗 '}
+                                                    {alert.type === 'checkup' && '🏥 '}
+                                                    {alert.type === 'hydration' && '💧 '}
+                                                    {alert.title_kn || alert.title}
+                                                </div>
+                                            )}
                                         </div>
-                                        <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-                                            {alert.description}
-                                        </p>
+                                        <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                                            {language === 'en' ? (
+                                                <p className="en-text">{alert.description}</p>
+                                            ) : (
+                                                <p className="kn-text">{alert.description_kn || alert.description}</p>
+                                            )}
+                                        </div>
                                         <div className="recommendation-frequency">
-                                            🕐 {alert.time} • {alert.frequency}
+                                            {language === 'en' ? (
+                                                <div className="en-text">🕐 {alert.time} • {alert.frequency}</div>
+                                            ) : (
+                                                <div className="kn-text">🕐 {alert.time} • {alert.frequency_kn || alert.frequency}</div>
+                                            )}
                                         </div>
                                     </div>
                                 ))}

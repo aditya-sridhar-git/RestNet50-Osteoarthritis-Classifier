@@ -19,26 +19,37 @@ export interface User {
 // Diet recommendation structure
 export interface DietRecommendation {
     category: string;
+    category_kn?: string;
     items: string[];
+    items_kn?: string[];
     frequency: string;
+    frequency_kn?: string;
 }
 
 // Exercise plan structure
 export interface ExercisePlan {
     name: string;
+    name_kn?: string;
     duration: string;
+    duration_kn?: string;
     frequency: string;
+    frequency_kn?: string;
     intensity: string;
+    intensity_kn?: string;
     tips: string;
+    tips_kn?: string;
 }
 
 // Alert/Reminder structure
 export interface Alert {
     type: 'exercise' | 'medication' | 'meal' | 'checkup' | 'hydration' | 'reminder';
     title: string;
+    title_kn?: string;
     description: string;
+    description_kn?: string;
     time: string;
     frequency: 'once' | 'daily' | 'weekly' | 'monthly' | string;
+    frequency_kn?: string;
 }
 
 // Calendar Event (extends Alert with additional metadata)

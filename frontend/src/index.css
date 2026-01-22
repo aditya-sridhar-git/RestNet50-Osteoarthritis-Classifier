@@ -1475,3 +1475,62 @@ body {
   resize: vertical;
   min-height: 80px;
 }
+
+/* ===== Kannada Translation Styling ===== */
+.kn-text {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Noto Sans Kannada', 'Tunga', 'Kedage', sans-serif;
+  color: var(--accent-secondary);
+  line-height: 1.5;
+  font-size: 1.05rem;
+  font-weight: 500;
+  display: block;
+  margin-top: 0.25rem;
+}
+
+.bilingual-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+/* ===== Language Toggle Styling ===== */
+.language-toggle-group {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.language-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+}
+
+.language-btn:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--accent-primary);
+  transform: translateY(-2px);
+}
+
+.language-btn.active {
+  background: var(--accent-gradient);
+  border-color: transparent;
+  color: white;
+  box-shadow: var(--shadow-glow);
+}
+
+.lang-icon {
+  font-size: 1.25rem;
+}

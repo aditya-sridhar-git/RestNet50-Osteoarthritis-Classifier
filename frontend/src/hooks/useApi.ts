@@ -257,6 +257,26 @@ export function useApi() {
         }
     }, []);
 
+    const sendChatMessage = useCallback(async (patientId: string, message: string): Promise<{ response_kn: string; response_en: string } | null> => {
+        setLoading(true);
+        setError(null);
+        try {
+            const response = await fetch(`${API_BASE}/api/chat`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ patient_id: patientId, message }),
+            });
+
+            if (!response.ok) throw new Error('Chat failed');
+            return await response.json();
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'An error occurred');
+            return null;
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
     return {
         loading,
         error,
@@ -271,6 +291,7 @@ export function useApi() {
         addCalendarEvent,
         updateCalendarEvent,
         deleteCalendarEvent,
+        sendChatMessage,
     };
 }
 

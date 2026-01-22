@@ -12,6 +12,7 @@ interface ScheduleCalendarProps {
     onDeleteEvent?: (eventId: string) => Promise<void>;
     onRegenerateCalendar?: () => Promise<void>;
     loading?: boolean;
+    language: 'en' | 'kn';
 }
 
 export default function ScheduleCalendar({
@@ -23,6 +24,7 @@ export default function ScheduleCalendar({
     onDeleteEvent,
     onRegenerateCalendar,
     loading = false,
+    language,
 }: ScheduleCalendarProps) {
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [modalOpen, setModalOpen] = useState(false);
@@ -184,7 +186,9 @@ export default function ScheduleCalendar({
     return (
         <div className="calendar-section">
             <div className="calendar-header">
-                <h2 className="result-title">Your Health Schedule</h2>
+                <h2 className="result-title">
+                    {language === 'en' ? 'Your Health Schedule' : 'ನಿಮ್ಮ ಆರೋಗ್ಯ ವೇಳಾಪಟ್ಟಿ'}
+                </h2>
                 <div className="calendar-nav">
                     <button className="calendar-nav-btn" onClick={prevMonth} aria-label="Previous month">
                         ←
@@ -197,9 +201,13 @@ export default function ScheduleCalendar({
             </div>
 
             <div className="schedule-info">
-                <span className="ai-badge">✨ AI Generated Schedule</span>
+                <span className="ai-badge">
+                    {language === 'en' ? '✨ AI Generated Schedule' : '✨ AI ರಚಿತ ವೇಳಾಪಟ್ಟಿ'}
+                </span>
                 <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '0.5rem' }}>
-                    These reminders are personalized based on your age, medical history, and diagnosis
+                    {language === 'en'
+                        ? 'These reminders are personalized based on your age, medical history, and diagnosis'
+                        : 'ಈ ಜ್ಞಾಪನೆಗಳು ನಿಮ್ಮ ವಯಸ್ಸು, ವೈದ್ಯಕೀಯ ಇತಿಹಾಸ ಮತ್ತು ರೋಗನಿರ್ಣಯದ ಆಧಾರದ ಮೇಲೆ ವೈಯಕ್ತೀಕರಿಸಲ್ಪಟ್ಟಿವೆ'}
                 </p>
             </div>
 
@@ -244,7 +252,8 @@ export default function ScheduleCalendar({
             <div className="alerts-section">
                 <div className="alerts-header">
                     <h3 className="alerts-title">
-                        Schedule for {selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+                        {language === 'en' ? 'Schedule for ' : 'ವೇಳಾಪಟ್ಟಿ '}
+                        {selectedDate.toLocaleDateString(language === 'en' ? 'en-US' : 'kn-IN', { weekday: 'long', month: 'short', day: 'numeric' })}
                     </h3>
                 </div>
 
@@ -265,12 +274,18 @@ export default function ScheduleCalendar({
                                     </div>
                                     <div className="alert-content">
                                         <div className="alert-title-row">
-                                            <span className="alert-title">{alert.title}</span>
+                                            <span className="alert-title">
+                                                {language === 'en' ? alert.title : (alert.title_kn || alert.title)}
+                                            </span>
                                             <span className="alert-time">{alert.time}</span>
                                         </div>
-                                        <p className="alert-description">{alert.description}</p>
+                                        <p className="alert-description">
+                                            {language === 'en' ? alert.description : (alert.description_kn || alert.description)}
+                                        </p>
                                         <div className="alert-meta">
-                                            <span className="alert-frequency">🔄 {alert.frequency}</span>
+                                            <span className="alert-frequency">
+                                                🔄 {language === 'en' ? alert.frequency : (alert.frequency_kn || alert.frequency)}
+                                            </span>
                                             {hasEventId && (
                                                 <span className={`alert-source ${calendarEvent.isAiGenerated ? 'ai' : 'custom'}`}>
                                                     {calendarEvent.isAiGenerated ? '🤖 AI' : '👤 Custom'}

@@ -4,6 +4,8 @@ import Header from './components/Header';
 import ImageUpload from './components/ImageUpload';
 import AnalysisResults from './components/AnalysisResults';
 import ScheduleCalendar from './components/ScheduleCalendar';
+import Settings from './components/Settings';
+import Discussions from './components/Discussions';
 import LoginForm from './components/LoginForm';
 import SignupForm from './components/SignupForm';
 import { useApi } from './hooks/useApi';
@@ -23,6 +25,7 @@ function App() {
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [alerts, setAlerts] = useState<(Alert | CalendarEvent)[]>([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [language, setLanguage] = useState<'en' | 'kn'>('en');
 
   const {
     loading,
@@ -48,6 +51,12 @@ function App() {
         setPatient(JSON.parse(savedPatient));
         if (savedUser) setUser(JSON.parse(savedUser));
         setIsAuthenticated(true);
+
+        // Load saved language preference
+        const savedLang = localStorage.getItem('osteoai_lang');
+        if (savedLang === 'en' || savedLang === 'kn') {
+          setLanguage(savedLang);
+        }
       } catch {
         localStorage.removeItem('osteoai_patient');
         localStorage.removeItem('osteoai_user');
@@ -284,6 +293,7 @@ function App() {
             {analysisResult && (
               <AnalysisResults
                 result={analysisResult}
+                language={language}
                 onAddSuggestedAlerts={() => setActiveTab('calendar')}
               />
             )}
@@ -311,9 +321,19 @@ function App() {
                 onDeleteEvent={handleDeleteEvent}
                 onRegenerateCalendar={handleRegenerateCalendar}
                 loading={loading}
+                language={language}
               />
             </div>
           </>
+        )}
+
+        {activeTab === 'discussions' && patient && (
+          <div className="dashboard-content">
+            <Discussions
+              patientId={patient.patientId}
+              language={language}
+            />
+          </div>
         )}
 
         {activeTab === 'about' && (
@@ -322,7 +342,7 @@ function App() {
             <div className="result-item">
               <p style={{ marginBottom: '1rem', color: 'var(--text-secondary)' }}>
                 OsteoAI is an AI-powered tool for analyzing knee X-rays to detect osteoarthritis severity levels.
-                Using deep learning models combined with Ollama LLM, it provides instant analysis along with personalized recommendations
+                Using deep learning models combined with Gemini AI, it provides instant analysis along with personalized recommendations
                 tailored to your age and medical history.
               </p>
 
@@ -332,9 +352,9 @@ function App() {
               <ul className="recommendation-items">
                 <li>Deep learning-based X-ray analysis</li>
                 <li>5-level severity classification (Normal to Severe)</li>
-                <li>AI-generated diet recommendations via Ollama</li>
+                <li>AI-generated diet recommendations via Gemini AI</li>
                 <li>Personalized exercise plans based on age & history</li>
-                <li>Editable health calendar with AI suggestions</li>
+                <li>Editable health calendar with AI suggestions {language === 'kn' && '(ಕನ್ನಡ ಬೆಂಬಲದೊಂದಿಗೆ)'}</li>
                 <li>Custom event creation and management</li>
               </ul>
 
@@ -355,6 +375,16 @@ function App() {
               ⚠️ This tool is for educational purposes only. Always consult with healthcare professionals for medical advice.
             </div>
           </div>
+        )}
+
+        {activeTab === 'settings' && (
+          <Settings
+            language={language}
+            onLanguageChange={(lang: 'en' | 'kn') => {
+              setLanguage(lang);
+              localStorage.setItem('osteoai_lang', lang);
+            }}
+          />
         )}
       </main>
 

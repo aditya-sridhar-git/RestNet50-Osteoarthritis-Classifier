@@ -19,7 +19,11 @@ from database.storage import (
     update_calendar_event,
     delete_calendar_event,
 )
-from services.ollama_service import generate_recommendations, generate_personalized_calendar
+from services.gemini_service import (
+    generate_recommendations, 
+    generate_personalized_calendar,
+    generate_chat_response
+)
 
 # Get project root
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -410,4 +414,31 @@ def remove_event(event_id):
     if success:
         return jsonify({"message": "Event deleted"})
     return jsonify({"error": "Failed to delete event"}), 500
+
+
+@routes.route("/api/chat", methods=["POST"])
+@cross_origin()
+def chat_endpoint():
+    """AI chat for discussions."""
+    data = request.json
+    message = data.get("message")
+    patient_id = data.get("patient_id")
+    
+    if not message:
+        return jsonify({"error": "Message is required"}), 400
+        
+    severity = "Normal"
+    patient_data = None
+    
+    if patient_id:
+        patient = get_patient_by_id(patient_id)
+        if patient:
+            severity = patient.get("severity", "Normal")
+            patient_data = {
+                "age": patient.get("age"),
+                "pastHistory": patient.get("pastHistory", "")
+            }
+            
+    response = generate_chat_response(message, severity, patient_data)
+    return jsonify(response)
 

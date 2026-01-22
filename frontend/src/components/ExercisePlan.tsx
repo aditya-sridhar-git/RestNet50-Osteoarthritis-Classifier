@@ -3,9 +3,10 @@ import type { ExercisePlan as ExercisePlanType } from '../types';
 interface ExercisePlanProps {
     exercises: ExercisePlanType[];
     source: 'ai' | 'static';
+    language: 'en' | 'kn';
 }
 
-export default function ExercisePlan({ exercises, source }: ExercisePlanProps) {
+export default function ExercisePlan({ exercises, source, language }: ExercisePlanProps) {
     if (!exercises || exercises.length === 0) {
         return (
             <div className="result-item">
@@ -38,23 +39,31 @@ export default function ExercisePlan({ exercises, source }: ExercisePlanProps) {
             <div className="recommendation-grid">
                 {exercises.map((exercise, index) => (
                     <div key={index} className="exercise-card">
-                        <div className="exercise-name">{exercise.name}</div>
+                        <div className="exercise-name">
+                            {language === 'en' ? exercise.name : (exercise.name_kn || exercise.name)}
+                        </div>
                         <div className="exercise-details">
                             <div className="exercise-detail">
                                 <div className="exercise-detail-label">Duration</div>
-                                <div className="exercise-detail-value">{exercise.duration}</div>
+                                <div className="exercise-detail-value">
+                                    {language === 'en' ? exercise.duration : (exercise.duration_kn || exercise.duration)}
+                                </div>
                             </div>
                             <div className="exercise-detail">
                                 <div className="exercise-detail-label">Frequency</div>
-                                <div className="exercise-detail-value">{exercise.frequency}</div>
+                                <div className="exercise-detail-value">
+                                    {language === 'en' ? exercise.frequency : (exercise.frequency_kn || exercise.frequency)}
+                                </div>
                             </div>
                             <div className="exercise-detail">
                                 <div className="exercise-detail-label">Intensity</div>
-                                <div className="exercise-detail-value">{exercise.intensity}</div>
+                                <div className="exercise-detail-value">
+                                    {language === 'en' ? exercise.intensity : (exercise.intensity_kn || exercise.intensity)}
+                                </div>
                             </div>
                         </div>
                         <div className="exercise-tips">
-                            💡 {exercise.tips}
+                            💡 {language === 'en' ? exercise.tips : (exercise.tips_kn || exercise.tips)}
                         </div>
                     </div>
                 ))}
