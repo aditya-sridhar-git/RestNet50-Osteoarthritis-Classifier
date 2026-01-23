@@ -287,6 +287,17 @@ def generate_chat_response(message: str, severity: str, patient_data: dict = Non
     """
     Generate an AI response for the chat interface in Kannada.
     """
+    print(f"[CHAT] Received message: {message}")
+    print(f"[CHAT] Severity: {severity}, Patient data: {patient_data}")
+    
+    # Check if Gemini is available first
+    if not GEMINI_API_KEY:
+        print("[CHAT] ERROR: No Gemini API key configured!")
+        return {
+            "response_kn": "ನಮಸ್ಕಾರ! ನಾನು ಆದಿತ್ಯ. ನಿಮ್ಮ ಆರೋಗ್ಯದ ಬಗ್ಗೆ ಕಾಳಜಿ ವಹಿಸಿ. ನಿಮ್ಮ ವೈದ್ಯರನ್ನು ನಿಯಮಿತವಾಗಿ ಭೇಟಿ ಮಾಡಿ.",
+            "response_en": "Hello! I am Aditya. Take care of your health. Visit your doctor regularly."
+        }
+    
     patient_context = ""
     if patient_data:
         age = patient_data.get('age', 'unknown')
@@ -313,13 +324,41 @@ Return ONLY a JSON object:
 }}
 """
 
+    print("[CHAT] Calling Gemini API...")
     response = generate_with_gemini(prompt)
+    print(f"[CHAT] Gemini response: {response[:200] if response else 'EMPTY'}...")
+    
     parsed = parse_json_from_response(response)
+    print(f"[CHAT] Parsed response: {parsed}")
     
     if parsed and "response_kn" in parsed:
         return parsed
     
+    # Provide a more helpful fallback based on common greetings
+    message_lower = message.lower() if message else ""
+    
+    if any(word in message_lower for word in ['hello', 'hi', 'namaste', 'ನಮಸ್ಕಾರ', 'ಹಲೋ']):
+        return {
+            "response_kn": "ನಮಸ್ಕಾರ! ನಾನು ಆದಿತ್ಯ. ನಿಮ್ಮ ಆರೋಗ್ಯದ ಬಗ್ಗೆ ನನಗೆ ಹೇಳಿ. ನಾನು ನಿಮಗೆ ಸಹಾಯ ಮಾಡಲು ಇಲ್ಲಿದ್ದೇನೆ.",
+            "response_en": "Hello! I am Aditya. Tell me about your health. I am here to help you."
+        }
+    elif any(word in message_lower for word in ['pain', 'hurt', 'ನೋವು', 'ವೇದನೆ']):
+        return {
+            "response_kn": "ನೋವು ಇದ್ದರೆ, ಮೊದಲು ವಿಶ್ರಾಂತಿ ತೆಗೆದುಕೊಳ್ಳಿ. ನೋವು ಮುಂದುವರಿದರೆ, ದಯವಿಟ್ಟು ನಿಮ್ಮ ವೈದ್ಯರನ್ನು ಭೇಟಿ ಮಾಡಿ.",
+            "response_en": "If you have pain, first take rest. If pain continues, please visit your doctor."
+        }
+    elif any(word in message_lower for word in ['exercise', 'walk', 'ವ್ಯಾಯಾಮ', 'ನಡಿಗೆ']):
+        return {
+            "response_kn": "ಹಗುರವಾದ ವ್ಯಾಯಾಮ ಮತ್ತು ನಡಿಗೆ ಕೀಲುಗಳಿಗೆ ಒಳ್ಳೆಯದು. ಆದರೆ ನಿಮ್ಮ ಶಕ್ತಿಗೆ ಅನುಗುಣವಾಗಿ ಮಾಡಿ.",
+            "response_en": "Light exercise and walking is good for joints. But do according to your capacity."
+        }
+    elif any(word in message_lower for word in ['diet', 'food', 'eat', 'ಆಹಾರ', 'ತಿನ್ನು']):
+        return {
+            "response_kn": "ಆರೋಗ್ಯಕರ ಆಹಾರ ಬಹಳ ಮುಖ್ಯ. ತರಕಾರಿಗಳು, ಹಣ್ಣುಗಳು ಮತ್ತು ಪ್ರೋಟೀನ್ ಸಮೃದ್ಧ ಆಹಾರ ತಿನ್ನಿ.",
+            "response_en": "Healthy food is very important. Eat vegetables, fruits and protein-rich food."
+        }
+    
     return {
-        "response_kn": "ಕ್ಷಮಿಸಿ, ನನಗೆ ಅದನ್ನು ಪ್ರಕ್ರಿಯೆಗೊಳಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ದಯವಿಟ್ಟು ಇನ್ನೊಮ್ಮೆ ಪ್ರಯತ್ನಿಸಿ.",
-        "response_en": "I'm sorry, I couldn't process that. Please try again."
+        "response_kn": "ನಮಸ್ಕಾರ! ನಾನು ಆದಿತ್ಯ. ನಿಮ್ಮ ಪ್ರಶ್ನೆಗೆ ಉತ್ತರಿಸಲು ನನಗೆ ಸಂತೋಷವಾಗುತ್ತದೆ. ದಯವಿಟ್ಟು ಇನ್ನೊಮ್ಮೆ ಕೇಳಿ.",
+        "response_en": "Hello! I am Aditya. I would be happy to answer your question. Please ask again."
     }
