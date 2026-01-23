@@ -6,7 +6,9 @@ interface LoginData {
     password: string;
 }
 
-const API_BASE = 'http://127.0.0.1:5000';
+const API_BASE = window.location.origin === 'http://localhost:5173' || window.location.origin === 'http://127.0.0.1:5173'
+    ? 'http://127.0.0.1:5000'
+    : '';
 
 export function useApi() {
     const [loading, setLoading] = useState(false);
@@ -277,6 +279,26 @@ export function useApi() {
         }
     }, []);
 
+    const sendArthritisChatMessage = useCallback(async (message: string): Promise<{ response_kn: string; response_en: string } | null> => {
+        setLoading(true);
+        setError(null);
+        try {
+            const response = await fetch(`${API_BASE}/api/arthritis-chat`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message }),
+            });
+
+            if (!response.ok) throw new Error('Chatbot request failed');
+            return await response.json();
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'An error occurred');
+            return null;
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
     return {
         loading,
         error,
@@ -292,6 +314,7 @@ export function useApi() {
         updateCalendarEvent,
         deleteCalendarEvent,
         sendChatMessage,
+        sendArthritisChatMessage,
     };
 }
 

@@ -5,9 +5,9 @@ import ImageUpload from './components/ImageUpload';
 import AnalysisResults from './components/AnalysisResults';
 import ScheduleCalendar from './components/ScheduleCalendar';
 import Settings from './components/Settings';
-import Discussions from './components/Discussions';
 import LoginForm from './components/LoginForm';
 import SignupForm from './components/SignupForm';
+import ArthritisChatbot from './components/ArthritisChatbot';
 import { useApi } from './hooks/useApi';
 import type { AnalysisResult, Alert, Patient, User, SignupData, CalendarEvent } from './types';
 
@@ -235,7 +235,7 @@ function App() {
     <div className="app">
       <div className="bg-gradient" />
 
-      <Header activeTab={activeTab} onTabChange={setActiveTab} />
+      <Header activeTab={activeTab} onTabChange={setActiveTab} language={language} />
 
       <main className="main">
         {/* Patient Info Bar */}
@@ -327,12 +327,10 @@ function App() {
           </>
         )}
 
-        {activeTab === 'discussions' && patient && (
+
+        {activeTab === 'chatbot' && (
           <div className="dashboard-content">
-            <Discussions
-              patientId={patient.patientId}
-              language={language}
-            />
+            <ArthritisChatbot language={language} />
           </div>
         )}
 
@@ -342,7 +340,7 @@ function App() {
             <div className="result-item">
               <p style={{ marginBottom: '1rem', color: 'var(--text-secondary)' }}>
                 OsteoAI is an AI-powered tool for analyzing knee X-rays to detect osteoarthritis severity levels.
-                Using deep learning models combined with Gemini AI, it provides instant analysis along with personalized recommendations
+                Using deep learning models combined with GPT-4o mini models via OpenAI, it provides instant analysis along with personalized recommendations
                 tailored to your age and medical history.
               </p>
 
@@ -352,7 +350,7 @@ function App() {
               <ul className="recommendation-items">
                 <li>Deep learning-based X-ray analysis</li>
                 <li>5-level severity classification (Normal to Severe)</li>
-                <li>AI-generated diet recommendations via Gemini AI</li>
+                <li>AI-generated recommendations via OpenAI GPT-4o mini</li>
                 <li>Personalized exercise plans based on age & history</li>
                 <li>Editable health calendar with AI suggestions {language === 'kn' && '(ಕನ್ನಡ ಬೆಂಬಲದೊಂದಿಗೆ)'}</li>
                 <li>Custom event creation and management</li>

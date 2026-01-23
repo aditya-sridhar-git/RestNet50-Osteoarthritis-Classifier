@@ -110,14 +110,15 @@ export const ALERT_TYPES: AlertTypeConfig[] = [
 // Severity configuration
 export interface SeverityConfig {
     level: SeverityLevel;
+    level_kn: string;
     color: string;
     percent: number;
 }
 
 export const SEVERITY_LEVELS: SeverityConfig[] = [
-    { level: 'Normal', color: '#10b981', percent: 20 },
-    { level: 'Doubtful', color: '#3b82f6', percent: 40 },
-    { level: 'Mild', color: '#f59e0b', percent: 60 },
-    { level: 'Moderate', color: '#f97316', percent: 80 },
-    { level: 'Severe', color: '#ef4444', percent: 100 },
+    { level: 'Normal', level_kn: 'ಸಾಮಾನ್ಯ', color: '#10b981', percent: 20 },
+    { level: 'Doubtful', level_kn: 'ಅನುಮಾನಾಸ್ಪದ', color: '#3b82f6', percent: 40 },
+    { level: 'Mild', level_kn: 'ಸೌಮ್ಯ', color: '#f59e0b', percent: 60 },
+    { level: 'Moderate', level_kn: 'ಮಧ್ಯಮ', color: '#f97316', percent: 80 },
+    { level: 'Severe', level_kn: 'ತೀವ್ರ', color: '#ef4444', percent: 100 },
 ];

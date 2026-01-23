@@ -1,0 +1,8 @@
+# Professional Backend Ignore
+__pycache__/
+*.pyc
+.env
+.flaskenv
+*.log
+venv/
+.venv/

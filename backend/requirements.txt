@@ -1,0 +1,14 @@
+torch
+torchvision
+opencv-python-headless
+numpy
+flask
+flask-cors
+schedule
+matplotlib
+Pillow
+requests
+pymongo
+openai
+python-dotenv
+gunicorn

@@ -1,3 +1,8 @@
+interface SettingsProps {
+    language: 'en' | 'kn';
+    onLanguageChange: (lang: 'en' | 'kn') => void;
+}
+
 export default function Settings({ language, onLanguageChange }: SettingsProps) {
     return (
         <div className="results-card">
