@@ -1,136 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OsteoAI - Arthritis Severity Detection</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OsteoAI - Arthritis Severity Detection</title>
+  <meta name="description"
+    content="AI-powered knee X-ray analysis for osteoarthritis severity detection with personalized diet, exercise, and health recommendations." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
+
 <body>
-    <div class="app">
-        <!-- Animated background -->
-        <div class="bg-gradient"></div>
-        
-        <!-- Header -->
-        <header class="header">
-            <div class="logo">
-                <div class="logo-icon">🦴</div>
-                <span class="logo-text">OsteoAI</span>
-            </div>
-            <nav class="nav">
-                <a href="#" class="nav-link active">Analyze</a>
-                <a href="#" class="nav-link">About</a>
-            </nav>
-        </header>
-
-        <!-- Main Content -->
-        <main class="main">
-            <div class="hero">
-                <h1 class="hero-title">
-                    <span class="gradient-text">AI-Powered</span><br>
-                    Osteoarthritis Detection
-                </h1>
-                <p class="hero-subtitle">
-                    Upload a knee X-ray for instant severity analysis with personalized recommendations
-                </p>
-            </div>
-
-            <!-- Upload Section -->
-            <div class="upload-section">
-                <div class="upload-card" id="uploadCard">
-                    <div class="upload-area" id="uploadArea">
-                        <div class="upload-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                                <polyline points="17 8 12 3 7 8"/>
-                                <line x1="12" y1="3" x2="12" y2="15"/>
-                            </svg>
-                        </div>
-                        <p class="upload-text">Drop your X-ray image here</p>
-                        <p class="upload-hint">or click to browse</p>
-                        <input type="file" id="fileInput" accept="image/*" hidden>
-                    </div>
-                    
-                    <!-- Preview -->
-                    <div class="preview-container" id="previewContainer">
-                        <img id="previewImage" class="preview-image" alt="X-ray preview">
-                        <button class="remove-btn" id="removeBtn">×</button>
-                    </div>
-                </div>
-
-                <!-- Patient ID Input -->
-                <div class="input-group">
-                    <label class="input-label">Patient ID</label>
-                    <input type="text" id="patientId" class="input-field" placeholder="Enter patient identifier...">
-                </div>
-
-                <!-- Analyze Button -->
-                <button class="analyze-btn" id="analyzeBtn" disabled>
-                    <span class="btn-text">Analyze X-ray</span>
-                    <div class="btn-loader" id="btnLoader"></div>
-                </button>
-            </div>
-
-            <!-- Results Section -->
-            <div class="results-section" id="resultsSection">
-                <div class="results-card">
-                    <div class="result-header">
-                        <h2 class="result-title">Analysis Results</h2>
-                        <div class="severity-badge" id="severityBadge">Normal</div>
-                    </div>
-                    
-                    <div class="result-grid">
-                        <!-- Severity Meter -->
-                        <div class="result-item severity-meter-container">
-                            <h3 class="item-title">Severity Level</h3>
-                            <div class="severity-meter">
-                                <div class="severity-track">
-                                    <div class="severity-fill" id="severityFill"></div>
-                                </div>
-                                <div class="severity-labels">
-                                    <span>Normal</span>
-                                    <span>Doubtful</span>
-                                    <span>Mild</span>
-                                    <span>Moderate</span>
-                                    <span>Severe</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Diet Recommendations -->
-                        <div class="result-item">
-                            <h3 class="item-title">
-                                <span class="item-icon">🥗</span>
-                                Diet Recommendations
-                            </h3>
-                            <ul class="recommendation-list" id="dietList"></ul>
-                        </div>
-
-                        <!-- Exercise Recommendations -->
-                        <div class="result-item">
-                            <h3 class="item-title">
-                                <span class="item-icon">🏃</span>
-                                Exercise Plan
-                            </h3>
-                            <ul class="recommendation-list" id="exerciseList"></ul>
-                        </div>
-                    </div>
-
-                    <!-- Disclaimer -->
-                    <div class="disclaimer" id="disclaimer"></div>
-                </div>
-            </div>
-        </main>
-
-        <!-- Footer -->
-        <footer class="footer">
-            <p>⚠️ This tool is for educational purposes only. Consult a healthcare professional for medical advice.</p>
-        </footer>
-    </div>
-
-    <script src="app.js"></script>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
 </body>
+
 </html>
